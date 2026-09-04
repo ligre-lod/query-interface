@@ -27,5 +27,6 @@ configs:
     content: |
       {
         "lodviewUrl": "${LODVIEW_URL:-http://localhost:8082}",
-        "sparqlEndpointUrl": "${SPARQL_ENDPOINT_URL:-http://localhost:8081/sparql}"
+        "sparqlEndpointUrl": "${SPARQL_ENDPOINT_URL:-http://localhost:8081/sparql}",
+        "sparqlPortalUrl": "${SPARQL_PORTAL_URL:-http://localhost:8081}"
       }

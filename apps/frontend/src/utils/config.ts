@@ -1,11 +1,18 @@
 interface RuntimeConfig {
   lodviewUrl: string;
   sparqlEndpointUrl: string;
+  // Human-facing SPARQL query UI (e.g. ontop's YASGUI portal). Locally this
+  // is ontop's own root, not /sparql (ontop's root serves the portal on a
+  // bare GET; /sparql requires a query param even on GET). Remotely these
+  // happen to be the same URL, since the load balancer strips the /sparql
+  // prefix down to ontop's root before forwarding.
+  sparqlPortalUrl: string;
 }
 
 const DEFAULT_CONFIG: RuntimeConfig = {
   lodviewUrl: 'http://localhost:8082',
   sparqlEndpointUrl: 'http://localhost:8081/sparql',
+  sparqlPortalUrl: 'http://localhost:8081',
 };
 
 let configPromise: Promise<RuntimeConfig> | null = null;

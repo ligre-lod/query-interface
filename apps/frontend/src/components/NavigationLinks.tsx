@@ -115,7 +115,7 @@ const NavigationLinks: React.FC = () => {
 
   useEffect(() => {
     getRuntimeConfig().then((config) =>
-      setSparqlEndpointUrl(config.sparqlEndpointUrl),
+      setSparqlEndpointUrl(config.sparqlPortalUrl),
     );
   }, []);
 
