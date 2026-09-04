@@ -1,0 +1,70 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: apps/frontend/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run build
+
+      # Runtime config is fetched by the app at /query-interface/config.json
+      # (see src/utils/config.ts). Locally there's no such file, so the app
+      # falls back to localhost. Here we bake in the real backend URLs.
+      # Override SPARQL_ENDPOINT_URL / LODVIEW_URL as repo Actions variables
+      # (Settings > Secrets and variables > Actions > Variables) once the
+      # backend moves off dev.ligre.ugent.be, no workflow edit required.
+      - name: Write runtime config
+        run: |
+          cat > dist/config.json <<EOF
+          {
+            "sparqlEndpointUrl": "${SPARQL_ENDPOINT_URL}",
+            "lodviewUrl": "${LODVIEW_URL}"
+          }
+          EOF
+        env:
+          SPARQL_ENDPOINT_URL: ${{ vars.SPARQL_ENDPOINT_URL || 'https://dev.ligre.ugent.be/sparql' }}
+          LODVIEW_URL: ${{ vars.LODVIEW_URL || 'https://dev.ligre.ugent.be' }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
