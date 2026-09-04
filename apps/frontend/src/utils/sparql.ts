@@ -44,10 +44,6 @@ function uriToGenderLabel(uri: string): string {
   return uriToLabel(uri, GENDER_URI_TO_LABEL);
 }
 
-function uriToInflectionTypeLabel(uri: string): string {
-  return uriToLabel(uri, INFLECTION_TYPE_URI_TO_LABEL);
-}
-
 function uriToPosLabel(uri: string): string {
   return uriToLabel(uri, POS_URI_TO_LABEL);
 }
@@ -56,21 +52,6 @@ const GENDER_URI_TO_LABEL: Record<string, string> = {
   'http://lila-erc.eu/ontologies/lila/feminine': 'Feminine',
   'http://lila-erc.eu/ontologies/lila/masculine': 'Masculine',
   'http://lila-erc.eu/ontologies/lila/neuter': 'Neuter',
-};
-
-const INFLECTION_TYPE_URI_TO_LABEL: Record<string, string> = {
-  'http://ligre.it/ontologies/ligre/c1': '1st Conjugation',
-  'http://ligre.it/ontologies/ligre/c1i': '1st Conj. Irregular',
-  'http://ligre.it/ontologies/ligre/c1p': '1st Conj. Procomplementary',
-  'http://ligre.it/ontologies/ligre/c1r': '1st Conj. Pronominal',
-  'http://ligre.it/ontologies/ligre/c2': '2nd Conjugation',
-  'http://ligre.it/ontologies/ligre/c2i': '2nd Conj. Irregular',
-  'http://ligre.it/ontologies/ligre/c2p': '2nd Conj. Procomplementary',
-  'http://ligre.it/ontologies/ligre/c2r': '2nd Conj. Pronominal',
-  'http://ligre.it/ontologies/ligre/c3': '3rd Conjugation',
-  'http://ligre.it/ontologies/ligre/c3i': '3rd Conj. Irregular',
-  'http://ligre.it/ontologies/ligre/c3p': '3rd Conj. Procomplementary',
-  'http://ligre.it/ontologies/ligre/c3r': '3rd Conj. Pronominal',
 };
 
 const POS_URI_TO_LABEL: Record<string, string> = {
@@ -100,7 +81,10 @@ export interface FilterOption {
   label: string;
 }
 
-async function getFilterOptions(predicate: string): Promise<FilterOption[]> {
+async function getFilterOptions(
+  predicate: string,
+  endpointUrl?: string,
+): Promise<FilterOption[]> {
   const query = `
     SELECT DISTINCT ?object ?label WHERE {
       ?subject <${predicate}> ?object .
@@ -109,7 +93,7 @@ async function getFilterOptions(predicate: string): Promise<FilterOption[]> {
   `;
 
   try {
-    const data = await client(query);
+    const data = await client(query, endpointUrl);
     return data.results.bindings.map((binding) => {
       const uri = binding.object.value;
       let label: string;
@@ -117,10 +101,6 @@ async function getFilterOptions(predicate: string): Promise<FilterOption[]> {
       // Choose the appropriate label mapping based on the predicate
       if (predicate === 'http://lila-erc.eu/ontologies/lila/hasGender') {
         label = uriToGenderLabel(uri);
-      } else if (
-        predicate === 'http://lila-erc.eu/ontologies/lila/hasInflectionType'
-      ) {
-        label = uriToInflectionTypeLabel(uri);
       } else if (predicate === 'http://lila-erc.eu/ontologies/lila/hasPOS') {
         label = uriToPosLabel(uri);
       } else {
@@ -139,18 +119,28 @@ async function getFilterOptions(predicate: string): Promise<FilterOption[]> {
   }
 }
 
-export async function getInflectionOptions(): Promise<FilterOption[]> {
+export async function getInflectionOptions(
+  endpointUrl?: string,
+): Promise<FilterOption[]> {
   return getFilterOptions(
     'http://lila-erc.eu/ontologies/lila/hasInflectionType',
+    endpointUrl,
   );
 }
 
-export async function getPosOptions(): Promise<FilterOption[]> {
-  return getFilterOptions('http://lila-erc.eu/ontologies/lila/hasPOS');
+export async function getPosOptions(
+  endpointUrl?: string,
+): Promise<FilterOption[]> {
+  return getFilterOptions('http://lila-erc.eu/ontologies/lila/hasPOS', endpointUrl);
 }
 
-export async function getGenderOptions(): Promise<FilterOption[]> {
-  return getFilterOptions('http://lila-erc.eu/ontologies/lila/hasGender');
+export async function getGenderOptions(
+  endpointUrl?: string,
+): Promise<FilterOption[]> {
+  return getFilterOptions(
+    'http://lila-erc.eu/ontologies/lila/hasGender',
+    endpointUrl,
+  );
 }
 
 export interface SearchFilters {
@@ -218,11 +208,12 @@ SELECT ?subject ?wrs ?pos ?lexicons where {
 
 export async function searchWithFilters(
   filters: SearchFilters,
+  endpointUrl?: string,
 ): Promise<SearchResult[]> {
   const query = generateSparqlQuery(filters);
 
   try {
-    const data = await client(query);
+    const data = await client(query, endpointUrl);
     return data.results.bindings.map((binding) => ({
       subject: binding.subject.value,
       wrs: binding.wrs.value,

@@ -42,7 +42,11 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
 
     setLoading(true);
     try {
-      const searchResults = await searchWithFilters(searchFilters);
+      const { sparqlEndpointUrl } = await getRuntimeConfig();
+      const searchResults = await searchWithFilters(
+        searchFilters,
+        sparqlEndpointUrl,
+      );
       setResults(searchResults);
     } catch (error) {
       console.error('Search failed:', error);
@@ -78,10 +82,11 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
     window.open(pageUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadCsv = () => {
+  const handleDownloadCsv = async () => {
+    const { sparqlEndpointUrl } = await getRuntimeConfig();
     const query = generateSparqlQuery(filters);
     const encodedQuery = encodeURIComponent(query);
-    const csvUrl = `https://ligre.it/sparql?query=${encodedQuery}&format=text%2Fcsv`;
+    const csvUrl = `${sparqlEndpointUrl}?query=${encodedQuery}&format=text%2Fcsv`;
     window.open(csvUrl, '_blank', 'noopener,noreferrer');
   };
 

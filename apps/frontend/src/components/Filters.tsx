@@ -1,7 +1,8 @@
 import { ContentCopy } from '@mui/icons-material';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { getRuntimeConfig } from '../utils/config';
 import type { SearchFilters } from '../utils/sparql';
 import {
   generateSparqlQuery,
@@ -50,6 +51,16 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
     }
   };
 
+  const fetchPosOptions = useCallback(async () => {
+    const { sparqlEndpointUrl } = await getRuntimeConfig();
+    return getPosOptions(sparqlEndpointUrl);
+  }, []);
+
+  const fetchGenderOptions = useCallback(async () => {
+    const { sparqlEndpointUrl } = await getRuntimeConfig();
+    return getGenderOptions(sparqlEndpointUrl);
+  }, []);
+
   return (
     <Box sx={{ p: 3 }}>
       <Box
@@ -91,14 +102,14 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
         <FilterSelect
           label="POS"
           value={pos}
-          fetchOptions={getPosOptions}
+          fetchOptions={fetchPosOptions}
           onChange={setPos}
         />
 
         <FilterSelect
           label="Gender"
           value={gender}
-          fetchOptions={getGenderOptions}
+          fetchOptions={fetchGenderOptions}
           onChange={setGender}
         />
       </Box>

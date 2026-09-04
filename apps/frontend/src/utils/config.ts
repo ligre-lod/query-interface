@@ -3,14 +3,9 @@ interface RuntimeConfig {
   sparqlEndpointUrl: string;
 }
 
-// const DEFAULT_CONFIG: RuntimeConfig = {
-//   lodviewUrl: 'http://localhost:8082',
-//   sparqlEndpointUrl: 'http://localhost:8081',
-// };
-
 const DEFAULT_CONFIG: RuntimeConfig = {
-  lodviewUrl: 'https://dev.ligre.ugent.be',
-  sparqlEndpointUrl: 'https://dev.ligre.ugent.be/sparql',
+  lodviewUrl: 'http://localhost:8082',
+  sparqlEndpointUrl: 'http://localhost:8081/sparql',
 };
 
 let configPromise: Promise<RuntimeConfig> | null = null;
