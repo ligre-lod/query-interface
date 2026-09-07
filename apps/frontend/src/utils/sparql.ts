@@ -21,10 +21,10 @@ async function client(
    const response = await fetch(endpointUrl, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/sparql-query',
+            'Content-Type': 'application/x-www-form-urlencoded',
             Accept: 'application/sparql-results+json',
         },
-        body:  query ,
+        body: new URLSearchParams({ query }),
     });
 
   if (!response.ok) {
