@@ -1,29 +1,14 @@
 import {
   Box,
   Button,
+  Link,
   Menu,
   MenuItem,
   CircularProgress,
 } from '@mui/material';
 import { ArrowDropDown } from '@mui/icons-material';
 import React, { useEffect, useState, useCallback } from 'react';
-import { NavLink, Link as RouterLink } from 'react-router-dom';
 import { getRuntimeConfig } from '../utils/config';
-
-const navLinkSx = {
-  color: 'inherit',
-  textDecoration: 'none',
-  fontSize: '0.875rem',
-  opacity: 0.8,
-  '&:hover': {
-    opacity: 1,
-    textDecoration: 'underline',
-  },
-  '&.active': {
-    opacity: 1,
-    fontWeight: 600,
-  },
-} as const;
 
 interface GitHubRepo {
   name: string;
@@ -37,7 +22,6 @@ interface MenuItemData {
   label: string;
   href: string;
   key?: string;
-  internal?: boolean;
 }
 
 interface ButtonMenuProps {
@@ -105,29 +89,18 @@ const ButtonMenu: React.FC<ButtonMenuProps> = ({
         ) : items.length === 0 ? (
           <MenuItem disabled>{emptyMessage}</MenuItem>
         ) : (
-          items.map((item) =>
-            item.internal ? (
-              <MenuItem
-                key={item.key || item.href}
-                component={RouterLink}
-                to={item.href}
-                onClick={handleClose}
-              >
-                {item.label}
-              </MenuItem>
-            ) : (
-              <MenuItem
-                key={item.key || item.href}
-                component="a"
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={handleClose}
-              >
-                {item.label}
-              </MenuItem>
-            ),
-          )
+          items.map((item) => (
+            <MenuItem
+              key={item.key || item.href}
+              component="a"
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={handleClose}
+            >
+              {item.label}
+            </MenuItem>
+          ))
         )}
       </Menu>
     </>
@@ -176,7 +149,6 @@ const NavigationLinks: React.FC = () => {
   };
 
   const toolkitItems: MenuItemData[] = [
-    { label: 'Search', href: '/search', key: 'search', internal: true },
     ...(sparqlEndpointUrl
       ? [{ label: 'SPARQL Endpoint', href: sparqlEndpointUrl, key: 'sparql-endpoint' }]
       : []),
@@ -188,13 +160,22 @@ const NavigationLinks: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 3 }}>
-      <Box component={NavLink} to="/" end sx={navLinkSx}>
-        Home
-      </Box>
-      {/*<Box component={NavLink} to="/search" sx={navLinkSx}>*/}
-      {/*  Search*/}
-      {/*</Box>*/}
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+      <Link
+        href="https://ligre-lod.github.io/"
+        sx={{
+          color: 'inherit',
+          textDecoration: 'none',
+          fontSize: '0.875rem',
+          opacity: 0.8,
+          '&:hover': {
+            opacity: 1,
+            textDecoration: 'underline',
+          },
+        }}
+      >
+        Back to Home
+      </Link>
       <ButtonMenu
         label="LiGre Toolkit"
         items={toolkitItems}
