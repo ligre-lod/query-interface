@@ -42,9 +42,10 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
 
     setLoading(true);
     try {
-      const { sparqlEndpointUrl } = await getRuntimeConfig();
+      const { sparqlEndpointUrl, lodviewUrl } = await getRuntimeConfig();
       const searchResults = await searchWithFilters(
         searchFilters,
+        lodviewUrl,
         sparqlEndpointUrl,
       );
       setResults(searchResults);
@@ -83,8 +84,8 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
   };
 
   const handleDownloadCsv = async () => {
-    const { sparqlEndpointUrl } = await getRuntimeConfig();
-    const query = generateSparqlQuery(filters);
+    const { sparqlEndpointUrl, lodviewUrl } = await getRuntimeConfig();
+    const query = generateSparqlQuery(filters, lodviewUrl);
     const encodedQuery = encodeURIComponent(query);
     const csvUrl = `${sparqlEndpointUrl}?query=${encodedQuery}&format=text%2Fcsv`;
     window.open(csvUrl, '_blank', 'noopener,noreferrer');

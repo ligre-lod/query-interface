@@ -157,7 +157,11 @@ export interface SearchResult {
   lexicons: string;
 }
 
-export function generateSparqlQuery(filters: SearchFilters): string {
+export function generateSparqlQuery(
+  filters: SearchFilters,
+  baseUrl: string,
+): string {
+  const lemmaBankIri = `${baseUrl.replace(/\/$/, '')}/data/id/lemma/LemmaBank`;
   const conditions: string[] = [];
 
   // Add filter conditions based on provided values
@@ -191,7 +195,7 @@ export function generateSparqlQuery(filters: SearchFilters): string {
   return `
 SELECT ?subject ?wrs ?pos ?lexicons where {
   {SELECT ?subject ?poslink ?pos (group_concat(distinct ?wr ; separator=" ") as ?wrs) (group_concat(distinct ?lexicon ; separator=" ") as ?lexicons) WHERE {
-      ?subject <http://purl.org/dc/terms/isPartOf> <https://dev.ligre.ugent.be/data/id/lemma/LemmaBank> .
+      ?subject <http://purl.org/dc/terms/isPartOf> <${lemmaBankIri}> .
       ${conditionsString}
       ?subject <http://lila-erc.eu/ontologies/lila/hasPOS> ?poslink .
       BIND(?poslink AS ?pos) .
@@ -208,9 +212,10 @@ SELECT ?subject ?wrs ?pos ?lexicons where {
 
 export async function searchWithFilters(
   filters: SearchFilters,
+  baseUrl: string,
   endpointUrl?: string,
 ): Promise<SearchResult[]> {
-  const query = generateSparqlQuery(filters);
+  const query = generateSparqlQuery(filters, baseUrl);
 
   try {
     const data = await client(query, endpointUrl);

@@ -33,19 +33,20 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
     onFiltersChange(filters);
   }, [lemma, inflectionType, pos, gender, onFiltersChange]);
 
-  const getSparqlQuery = () => {
+  const getSparqlQuery = async () => {
     const filters: SearchFilters = {
       lemma: lemma || undefined,
       inflectionType: inflectionType || undefined,
       pos: pos || undefined,
       gender: gender || undefined,
     };
-    return generateSparqlQuery(filters);
+    const { lodviewUrl } = await getRuntimeConfig();
+    return generateSparqlQuery(filters, lodviewUrl);
   };
 
   const handleCopySparql = async () => {
     try {
-      await navigator.clipboard.writeText(getSparqlQuery());
+      await navigator.clipboard.writeText(await getSparqlQuery());
     } catch (error) {
       console.error('Failed to copy SPARQL query:', error);
     }
