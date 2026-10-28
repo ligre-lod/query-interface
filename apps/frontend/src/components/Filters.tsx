@@ -40,8 +40,8 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
       pos: pos || undefined,
       gender: gender || undefined,
     };
-    const { lodviewUrl } = await getRuntimeConfig();
-    return generateSparqlQuery(filters, lodviewUrl);
+    const { iriBaseUrl } = await getRuntimeConfig();
+    return generateSparqlQuery(filters, iriBaseUrl);
   };
 
   const handleCopySparql = async () => {

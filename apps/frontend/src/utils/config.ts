@@ -1,4 +1,8 @@
 interface RuntimeConfig {
+  // Namespace the resource IRIs are minted in. Deployments use the persistent
+  // https://w3id.org/ligre namespace, which w3id redirects to the LodView host;
+  // the local stack mints IRIs on the local LodView itself.
+  iriBaseUrl: string;
   lodviewUrl: string;
   sparqlEndpointUrl: string;
   // Human-facing SPARQL query UI (e.g. ontop's YASGUI portal). Locally this
@@ -10,6 +14,7 @@ interface RuntimeConfig {
 }
 
 const DEFAULT_CONFIG: RuntimeConfig = {
+  iriBaseUrl: 'http://localhost:8082',
   lodviewUrl: 'http://localhost:8082',
   sparqlEndpointUrl: 'http://localhost:8081/sparql',
   sparqlPortalUrl: 'http://localhost:8081',
@@ -27,8 +32,9 @@ export function getRuntimeConfig(): Promise<RuntimeConfig> {
     configPromise = fetch('/query-interface/config.json')
       .then((response) => {
         if (!response.ok) throw new Error(`status ${response.status}`);
-        return response.json() as Promise<RuntimeConfig>;
+        return response.json() as Promise<Partial<RuntimeConfig>>;
       })
+      .then((config) => ({ ...DEFAULT_CONFIG, ...config }))
       .catch(() => DEFAULT_CONFIG);
   }
   return configPromise;
