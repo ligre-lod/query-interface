@@ -42,10 +42,10 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
 
     setLoading(true);
     try {
-      const { sparqlEndpointUrl, lodviewUrl } = await getRuntimeConfig();
+      const { sparqlEndpointUrl, iriBaseUrl } = await getRuntimeConfig();
       const searchResults = await searchWithFilters(
         searchFilters,
-        lodviewUrl,
+        iriBaseUrl,
         sparqlEndpointUrl,
       );
       setResults(searchResults);
@@ -77,15 +77,19 @@ const Results: React.FC<ResultsProps> = ({ filters }) => {
   }, [filters, performSearch]);
 
   const openLemmaPage = async (subject: string) => {
-    const { lodviewUrl } = await getRuntimeConfig();
-    const iriPath = new URL(subject).pathname;
-    const pageUrl = `${lodviewUrl}${iriPath}`;
+    const { lodviewUrl, iriBaseUrl } = await getRuntimeConfig();
+    const iriBase = iriBaseUrl.replace(/\/$/, '');
+    // Map the IRI onto the configured LodView host; anything outside our
+    // namespace is opened as-is.
+    const pageUrl = subject.startsWith(`${iriBase}/`)
+      ? `${lodviewUrl.replace(/\/$/, '')}${subject.slice(iriBase.length)}`
+      : subject;
     window.open(pageUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownloadCsv = async () => {
-    const { sparqlEndpointUrl, lodviewUrl } = await getRuntimeConfig();
-    const query = generateSparqlQuery(filters, lodviewUrl);
+    const { sparqlEndpointUrl, iriBaseUrl } = await getRuntimeConfig();
+    const query = generateSparqlQuery(filters, iriBaseUrl);
     const encodedQuery = encodeURIComponent(query);
     const csvUrl = `${sparqlEndpointUrl}?query=${encodedQuery}&format=text%2Fcsv`;
     window.open(csvUrl, '_blank', 'noopener,noreferrer');
