@@ -8,5 +8,6 @@ export default defineConfig({
   },
   html: {
     title: 'LiGre Query Interface',
+    favicon: './src/static/favicon.svg',
   },
 });
